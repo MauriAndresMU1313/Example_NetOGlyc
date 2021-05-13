@@ -1,0 +1,130 @@
+use strict;
+
+use warnings;
+
+
+
+my $file = "229E_O.csv";
+
+my @filearray = ();
+
+my @array_ids = ();
+
+
+
+my $thres = 0.5;
+
+
+
+#### Abrir archivo como tabular
+
+open (F, $file) or die;
+
+while(my $l = <F>) {
+
+    $l =~ s/\n//g;
+
+    $l =~ s/\r//g;
+
+    my @cols = split(/\s+/, $l); # partir las columnas por "más de un espacio"
+
+    next unless (scalar (@cols) == 8); ### si la linea no tiene 6 cols, no se agrega al array
+
+
+
+    #### almacenar linea
+
+    push @filearray, $l;
+
+
+
+    #### almacenar ID
+
+    my $current_id = $cols[0];
+
+    push @array_ids, $current_id;
+
+    #print "$l\n"; #### DIAG
+
+}
+
+close F;
+
+
+
+#### Crear array de IDs no redundante
+
+#print scalar(@filearray); #### DIAG
+
+#print scalar(@array_ids); #### DIAG
+
+#print @array_ids; #### DIAG
+
+my @nr_array_ids = uniq(@array_ids);
+
+#print "\n"; #### DIAG
+
+#print scalar(@nr_array_ids); #### DIAG
+
+#print "\n"; #### DIAG
+
+
+
+foreach my $new_id (@nr_array_ids) { ### para cada ID no redundante
+
+  my $counter = 0;
+
+  my $total = 0;
+
+
+
+  foreach my $new_L (@filearray) { ### para cada linea del archivo
+
+    my @n_cols = split(/\s+/, $new_L);
+
+    my $potential = $n_cols[5];
+
+    my $idd = $n_cols[0];
+
+
+
+    if ($new_id eq $idd) {
+
+      ++$total;
+
+    }
+
+
+
+    if ( ($new_id eq $idd) and ($potential >= $thres) ) {
+
+      ++$counter;
+
+    }
+
+
+
+  }
+
+  print "$new_id\t$counter\t$total\n";
+
+
+
+}
+
+
+
+exit;
+
+
+
+#### SUBRUTINE uniq
+
+sub uniq {
+
+  my %seen;
+
+  return grep { !$seen{$_}++ } @_;
+
+}
+
